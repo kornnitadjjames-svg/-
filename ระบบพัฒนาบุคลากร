@@ -1,0 +1,391 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CDD PHANGNGA SMART HR</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:Tahoma,Arial,sans-serif;
+  background:#f1f5fb;color:#20304a
+}
+header{
+  background:linear-gradient(110deg,#123c72,#187cc1);
+  color:white;padding:28px 6%
+}
+header h1{margin:0;font-size:26px}
+header p{margin:8px 0 0}
+main{max-width:1250px;margin:auto;padding:25px}
+.cards{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:15px;margin-bottom:20px
+}
+.card,.panel{
+  background:white;border-radius:16px;
+  padding:22px;box-shadow:0 4px 18px #1b355015
+}
+.card strong{font-size:30px;color:#1768b3}
+.card p{color:#64748b;margin:0 0 10px}
+.panel{margin-bottom:20px}
+h2{margin-top:0;font-size:20px}
+.form-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:15px
+}
+label{display:block;font-weight:bold;font-size:14px}
+input,select{
+  display:block;width:100%;padding:12px;
+  margin-top:7px;border:1px solid #d5dfeb;
+  border-radius:9px;font:inherit;background:white
+}
+input:focus,select:focus{
+  outline:2px solid #80b9f1
+}
+.actions{margin-top:18px;display:flex;gap:10px}
+button{
+  border:0;border-radius:9px;padding:11px 17px;
+  font-weight:bold;cursor:pointer
+}
+.primary{background:#176bc1;color:white}
+.secondary{background:#e6edf5;color:#334155}
+.edit{background:#fff0c2;color:#805300}
+.delete{background:#ffe1e1;color:#b42318}
+.search{margin-bottom:15px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:850px}
+th,td{
+  padding:13px;text-align:left;
+  border-bottom:1px solid #e5eaf1
+}
+th{background:#edf5ff;color:#234b80}
+td button{margin:2px}
+.empty{text-align:center;color:#64748b;padding:25px}
+@media(max-width:700px){
+  .cards,.form-grid{grid-template-columns:1fr}
+  main{padding:12px}
+  header h1{font-size:21px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>CDD PHANGNGA | SMART HR SYSTEM</h1>
+  <p>ระบบบริหารข้อมูลบุคลากร สำนักงานพัฒนาชุมชนจังหวัดพังงา</p>
+</header>
+
+<main>
+  <section class="cards">
+    <div class="card">
+      <p>บุคลากรทั้งหมด</p>
+      <strong id="total">0</strong> คน
+    </div>
+    <div class="card">
+      <p>จำนวนพื้นที่รับผิดชอบ</p>
+      <strong id="areas">0</strong> พื้นที่
+    </div>
+    <div class="card">
+      <p>อายุงานเฉลี่ย</p>
+      <strong id="average">0</strong> ปี
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 id="formTitle">เพิ่มข้อมูลบุคลากร</h2>
+    <form id="staffForm">
+      <input type="hidden" id="editId">
+      <div class="form-grid">
+        <label>ชื่อ - นามสกุล
+          <input id="fullname" required
+            placeholder="เช่น นายสมชาย ใจดี">
+        </label>
+        <label>ตำแหน่ง
+          <input id="position" required
+            placeholder="เช่น นักวิชาการพัฒนาชุมชนชำนาญการ">
+        </label>
+        <label>วันที่บรรจุเข้ารับราชการ
+          <input id="startDate" type="date" required>
+        </label>
+        <label>พื้นที่รับผิดชอบ
+          <select id="area" required>
+            <option value="">-- เลือกพื้นที่ --</option>
+            <option>สำนักงานพัฒนาชุมชนจังหวัดพังงา</option>
+            <option>อำเภอเมืองพังงา</option>
+            <option>อำเภอเกาะยาว</option>
+            <option>อำเภอกะปง</option>
+            <option>อำเภอตะกั่วทุ่ง</option>
+            <option>อำเภอตะกั่วป่า</option>
+            <option>อำเภอคุระบุรี</option>
+            <option>อำเภอทับปุด</option>
+            <option>อำเภอท้ายเหมือง</option>
+          </select>
+        </label>
+      </div>
+      <div class="actions">
+        <button class="primary" type="submit">
+          บันทึกข้อมูล
+        </button>
+        <button class="secondary" type="button"
+          onclick="resetForm()">ล้างแบบฟอร์ม</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>ทะเบียนข้อมูลบุคลากร</h2>
+    <input class="search" id="search"
+      placeholder="ค้นหาชื่อ ตำแหน่ง หรือพื้นที่รับผิดชอบ">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ลำดับ</th>
+            <th>ชื่อ - นามสกุล</th>
+            <th>ตำแหน่ง</th>
+            <th>วันที่บรรจุ</th>
+            <th>อายุงาน</th>
+            <th>พื้นที่รับผิดชอบ</th>
+            <th>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="staffTable"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+const KEY = "cdd_phangnga_hr_v1";
+let staff = [];
+
+try {
+  const saved = JSON.parse(localStorage.getItem(KEY));
+  staff = Array.isArray(saved) ? saved : [];
+} catch {
+  staff = [];
+}
+
+const $ = id => document.getElementById(id);
+
+function todayLocal(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+
+$("startDate").max = todayLocal();
+
+function calculateService(dateString){
+  const [y,m,d] = dateString.split("-").map(Number);
+  const start = new Date(y,m-1,d);
+  const today = new Date();
+
+  if(Number.isNaN(start.getTime()) || start > today){
+    return {years:0,months:0,days:0,totalYears:0};
+  }
+
+  // นับปีและเดือนปฏิทินเต็ม
+  let years = today.getFullYear()-start.getFullYear();
+  let months = today.getMonth()-start.getMonth();
+
+  if(today.getDate() < start.getDate()){
+    months--;
+  }
+  if(months < 0){
+    years--;
+    months += 12;
+  }
+
+  // หาวันที่ครบปีและเดือนล่าสุด
+  const totalMonths = years*12+months;
+  const anniversary = new Date(
+    y,m-1+totalMonths,d
+  );
+
+  // รองรับกรณีสิ้นเดือน
+  const adjusted = new Date(
+    anniversary.getFullYear(),
+    anniversary.getMonth(),
+    Math.min(d,new Date(
+      anniversary.getFullYear(),
+      anniversary.getMonth()+1,0
+    ).getDate())
+  );
+
+  const dayMs = 86400000;
+  const days = Math.max(0,Math.round(
+    (Date.UTC(today.getFullYear(),today.getMonth(),
+      today.getDate())-
+     Date.UTC(adjusted.getFullYear(),
+      adjusted.getMonth(),adjusted.getDate()))/dayMs
+  ));
+
+  return {
+    years,months,days,
+    totalYears:years+months/12+days/365.2425
+  };
+}
+
+function formatDate(value){
+  const [y,m,d] = value.split("-").map(Number);
+  return new Intl.DateTimeFormat("th-TH",{
+    day:"numeric",month:"long",year:"numeric"
+  }).format(new Date(y,m-1,d));
+}
+
+function save(){
+  try{
+    localStorage.setItem(KEY,JSON.stringify(staff));
+    return true;
+  }catch{
+    alert("ไม่สามารถบันทึกข้อมูลในเบราว์เซอร์ได้");
+    return false;
+  }
+}
+
+function resetForm(){
+  $("staffForm").reset();
+  $("editId").value="";
+  $("formTitle").textContent="เพิ่มข้อมูลบุคลากร";
+}
+
+$("staffForm").addEventListener("submit",event=>{
+  event.preventDefault();
+
+  const name=$("fullname").value.trim();
+  const position=$("position").value.trim();
+  const startDate=$("startDate").value;
+  const area=$("area").value;
+  const editId=$("editId").value;
+
+  if(!name || !position || !startDate || !area){
+    alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+    return;
+  }
+
+  if(startDate > todayLocal()){
+    alert("วันที่บรรจุต้องไม่เกินวันปัจจุบัน");
+    return;
+  }
+
+  const record={
+    id:editId || crypto.randomUUID(),
+    name,position,startDate,area
+  };
+
+  const previous=[...staff];
+  if(editId){
+    staff=staff.map(s=>s.id===editId?record:s);
+  }else{
+    staff.push(record);
+  }
+
+  if(!save()){
+    staff=previous;
+    return;
+  }
+  resetForm();
+  render();
+});
+
+function editStaff(id){
+  const s=staff.find(item=>item.id===id);
+  if(!s)return;
+
+  $("editId").value=s.id;
+  $("fullname").value=s.name;
+  $("position").value=s.position;
+  $("startDate").value=s.startDate;
+  $("area").value=s.area;
+  $("formTitle").textContent="แก้ไขข้อมูลบุคลากร";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function deleteStaff(id){
+  const s=staff.find(item=>item.id===id);
+  if(!s || !confirm("ยืนยันการลบข้อมูล "+s.name+" ?"))
+    return;
+
+  const previous=[...staff];
+  staff=staff.filter(item=>item.id!==id);
+  if(!save()){
+    staff=previous;
+    return;
+  }
+  render();
+}
+
+function render(){
+  const keyword=$("search").value.toLowerCase().trim();
+  const filtered=staff.filter(s=>
+    [s.name,s.position,s.area].some(v=>
+      v.toLowerCase().includes(keyword)
+    )
+  );
+
+  const tbody=$("staffTable");
+  tbody.replaceChildren();
+
+  if(filtered.length===0){
+    const tr=document.createElement("tr");
+    const td=document.createElement("td");
+    td.colSpan=7;
+    td.className="empty";
+    td.textContent="ไม่พบข้อมูลบุคลากร";
+    tr.append(td);
+    tbody.append(tr);
+  }
+
+  filtered.forEach((s,i)=>{
+    const duration=calculateService(s.startDate);
+    const tr=document.createElement("tr");
+
+    const values=[
+      i+1,s.name,s.position,formatDate(s.startDate),
+      `${duration.years} ปี ${duration.months} เดือน ${duration.days} วัน`,
+      s.area
+    ];
+
+    values.forEach(value=>{
+      const td=document.createElement("td");
+      td.textContent=value;
+      tr.append(td);
+    });
+
+    const actions=document.createElement("td");
+    const edit=document.createElement("button");
+    edit.className="edit";
+    edit.textContent="แก้ไข";
+    edit.onclick=()=>editStaff(s.id);
+
+    const remove=document.createElement("button");
+    remove.className="delete";
+    remove.textContent="ลบ";
+    remove.onclick=()=>deleteStaff(s.id);
+
+    actions.append(edit,remove);
+    tr.append(actions);
+    tbody.append(tr);
+  });
+
+  $("total").textContent=staff.length;
+  $("areas").textContent=new Set(
+    staff.map(s=>s.area)
+  ).size;
+
+  const average=staff.length
+    ?staff.reduce((sum,s)=>
+      sum+calculateService(s.startDate).totalYears,0
+    )/staff.length:0;
+
+  $("average").textContent=average.toFixed(1);
+}
+
+$("search").addEventListener("input",render);
+render();
+</script>
+</body>
+</html>
